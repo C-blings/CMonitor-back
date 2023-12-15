@@ -1,6 +1,6 @@
 # CMonitor-back
 
-## /get-project?documentId=<documentId>
+## /get-project?documentId=\<documentId\>
 ### Получение проекта по имени
 
 ## /post-project body=\<project json\>
