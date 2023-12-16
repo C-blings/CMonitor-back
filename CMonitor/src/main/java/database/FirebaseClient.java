@@ -1,12 +1,13 @@
 package database;
 
 import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.WriteResult;
+import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 public class FirebaseClient {
@@ -17,24 +18,40 @@ public class FirebaseClient {
         database = FirestoreClient.getFirestore();
     }
 
-    public static DocumentSnapshot getDocument(String documentId) throws ExecutionException, InterruptedException {
-        DocumentReference documentReference = database.collection("projects").document(documentId);
+    public static <T> String addToDocument(DocumentReference documentReference, T object) throws ExecutionException, InterruptedException {
+        ApiFuture<WriteResult> collection = documentReference.set(object);
+        return collection.get().getUpdateTime().toString();
+    }
+
+    public static String deleteFormDocument(DocumentReference documentReference) throws ExecutionException, InterruptedException {
+        ApiFuture<WriteResult> result = documentReference.delete();
+        return result.get().getUpdateTime().toString();
+    }
+
+    public static <T> String updateDocument(DocumentReference documentReference, T newObject) throws ExecutionException, InterruptedException {
+        return addToDocument(documentReference, newObject);
+    }
+
+    public static DocumentReference getDocument(String collectionName, String documentName){
+        return database.collection(collectionName).document(documentName);
+    }
+
+    public static DocumentReference getDocument(CollectionReference collectionReference, String documentName){
+        return collectionReference.document(documentName);
+    }
+
+    public static DocumentSnapshot getDocumentSnapshot(CollectionReference collectionReference, String documentName) throws ExecutionException, InterruptedException {
+        DocumentReference documentReference = collectionReference.document(documentName);
         ApiFuture<DocumentSnapshot> future = documentReference.get();
 
         return future.get();
     }
 
-    public static <T> String addToCollection(String collectionName, String documentName, T object) throws ExecutionException, InterruptedException {
-        ApiFuture<WriteResult> collection = database.collection(collectionName).document(documentName).set(object);
-        return collection.get().getUpdateTime().toString();
+    public static CollectionReference getCollection(String collectionName){
+        return database.collection(collectionName);
     }
 
-    public static String deleteFormCollection(String collectionName, String documentName) throws ExecutionException, InterruptedException {
-        ApiFuture<WriteResult> result = database.collection(collectionName).document(documentName).delete();
-        return result.get().getUpdateTime().toString();
-    }
-
-    public static <T> String updateDocument(String collectionName, String documentName, T newObject) throws ExecutionException, InterruptedException {
-        return addToCollection(collectionName, documentName, newObject);
+    public static CollectionReference getCollection(DocumentReference documentReference, String collectionName){
+        return documentReference.collection(collectionName);
     }
 }

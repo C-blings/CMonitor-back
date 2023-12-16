@@ -1,9 +1,7 @@
 package server.services;
 
 import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.WriteResult;
+import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import database.FirebaseClient;
 import models.Project;
@@ -17,11 +15,13 @@ public class ProjectService {
     private static final String collectionName = "projects";
 
     public String createProject(Project project) throws ExecutionException, InterruptedException {
-        return FirebaseClient.addToCollection(collectionName, project.projectName, project);
+        DocumentReference documentReference = FirebaseClient.getDocument(collectionName, project.projectName);
+        return FirebaseClient.addToDocument(documentReference, project);
     }
 
-    public Project getProject(String documentId) throws ExecutionException, InterruptedException {
-        DocumentSnapshot document = FirebaseClient.getDocument(documentId);
+    public Project getProject(String documentName) throws ExecutionException, InterruptedException {
+        CollectionReference collectionReference = FirebaseClient.getCollection(collectionName);
+        DocumentSnapshot document = FirebaseClient.getDocumentSnapshot(collectionReference, documentName);
 
         Project project;
         if (document.exists()){
@@ -31,11 +31,13 @@ public class ProjectService {
         return null;
     }
 
-    public String deleteProject(String documentId) throws ExecutionException, InterruptedException {
-        return FirebaseClient.deleteFormCollection(collectionName, documentId);
+    public String deleteProject(String projectName) throws ExecutionException, InterruptedException {
+        DocumentReference documentReference = FirebaseClient.getDocument(collectionName, projectName);
+        return FirebaseClient.deleteFormDocument(documentReference);
     }
 
     public String updateProject(Project project) throws ExecutionException, InterruptedException {
-        return FirebaseClient.updateDocument(collectionName, project.projectName, project);
+        DocumentReference documentReference = FirebaseClient.getDocument(collectionName, project.projectName);
+        return FirebaseClient.updateDocument(documentReference, project);
     }
 }
