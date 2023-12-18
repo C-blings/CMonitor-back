@@ -7,6 +7,7 @@ import server.services.ProjectService;
 import java.util.concurrent.ExecutionException;
 
 @RestController
+@CrossOrigin
 public class ProjectsController {
 
     private final ProjectService projectService;
